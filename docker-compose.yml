@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  xray-reality:
+    image: teddysun/xray
+    container_name: xray-reality
+    restart: unless-stopped
+    ports:
+      - "443:443"
+    volumes:
+      - ./config.json:/etc/xray/config.json
+      - ./logs:/var/log/xray
+      - ./stats:/opt/xray/stats
+    networks:
+      - xray-network
+
+networks:
+  xray-network:
+    driver: bridge

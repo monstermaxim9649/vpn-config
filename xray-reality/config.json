@@ -1,0 +1,286 @@
+{
+  "log": {
+    "loglevel": "warning",
+    "access": "/var/log/xray/access.log"
+  },
+  "stats": {},
+  "api": {
+    "tag": "api",
+    "services": [
+      "StatsService"
+    ]
+  },
+  "inbounds": [
+    {
+      "listen": "127.0.0.1",
+      "port": 10085,
+      "protocol": "dokodemo-door",
+      "settings": {
+        "address": "127.0.0.1"
+      },
+      "tag": "api"
+    },
+    {
+      "port": 443,
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "id": "fb43b3c0-64e4-484e-a671-bc3eee4e7a5f",
+            "flow": "xtls-rprx-vision",
+            "email": "clxvis",
+            "level": 0
+          },
+          {
+            "id": "5e28cd75-c49c-4010-bf7b-b3c5c13b5dc0",
+            "flow": "xtls-rprx-vision",
+            "email": "Sofia"
+          },
+          {
+            "id": "604bb334-d073-4fa9-91a3-c414dc6086cf",
+            "flow": "xtls-rprx-vision",
+            "email": "MadWalk"
+          },
+          {
+            "id": "f68fd77f-1758-4ab8-b47e-b18e42cb5298",
+            "flow": "xtls-rprx-vision",
+            "email": "VlaDick"
+          },
+          {
+            "id": "a19b747a-231f-4c2a-a4f2-23622a61f826",
+            "flow": "xtls-rprx-vision",
+            "email": "Element",
+            "level": 3
+          },
+          {
+            "id": "a800f27c-7f89-44f1-9c9c-7ecf26ea97b1",
+            "flow": "xtls-rprx-vision",
+            "email": "MadWalkWomen"
+          },
+          {
+            "id": "58c58f13-75c1-4d56-9fa8-da248cf15bad",
+            "flow": "xtls-rprx-vision",
+            "email": "ClxvisTV"
+          },
+          {
+            "id": "352e60bf-d72a-4660-a71c-6d793c421be8",
+            "flow": "xtls-rprx-vision",
+            "email": "SanyaKurchikov"
+          },
+          {
+            "id": "e799820f-92e5-49fd-945e-3e40405fc614",
+            "flow": "xtls-rprx-vision",
+            "email": "Svetlana"
+          },
+          {
+            "id": "4e01acbc-d668-4875-b332-5dd6a16c8ead",
+            "flow": "xtls-rprx-vision",
+            "email": "VasilyUmnyashkin",
+            "level": 3
+          },
+          {
+            "id": "bb14e68d-ccde-40cb-9e5d-62eb94466215",
+            "flow": "xtls-rprx-vision",
+            "email": "AnastasiaShishkina"
+          },
+          {
+            "id": "6d84139e-5ece-409b-b505-245689fac43e",
+            "flow": "xtls-rprx-vision",
+            "email": "PolinaAksyutik"
+          },
+          {
+            "id": "78301a37-8e51-4d87-be57-84d6d410205c",
+            "flow": "xtls-rprx-vision",
+            "email": "Ulyana"
+          },
+          {
+            "id": "8e5b7774-9aaf-409a-b595-e982978b1880",
+            "flow": "xtls-rprx-vision",
+            "email": "DmitryAstapenko"
+          },
+          {
+            "id": "6061c4bc-b570-4053-afb4-fd762f8ecd3e",
+            "flow": "xtls-rprx-vision",
+            "email": "SofiaTV"
+          },
+          {
+            "id": "70423be1-6f38-4ba8-b8eb-38ecd7810838",
+            "flow": "xtls-rprx-vision",
+            "email": "user_pamkuu"
+          },
+          {
+            "id": "832b2e5d-d25f-414b-9dd0-741c2cbeb9e4",
+            "flow": "xtls-rprx-vision",
+            "email": "LelyaNatasha",
+            "level": 3
+          }
+        ],
+        "decryption": "none",
+        "fallbacks": [],
+        "disabledClients": [
+          "testuser"
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "reality",
+        "realitySettings": {
+          "show": false,
+          "dest": "www.vimeo.com:443",
+          "xver": 0,
+          "serverNames": [
+            "www.vimeo.com"
+          ],
+          "privateKey": "oAMt6sI9LNcBDzzylDYDONePBDuwk-nERh-RsKdrAEQ",
+          "shortIds": [
+            "123abc",
+            "5b4b9a",
+            "03798e",
+            "56f4be",
+            "98cf8d",
+            "9470af",
+            "106b17",
+            "f9f527",
+            "3ef56f",
+            "1ec2cf",
+            "cd9b72",
+            "37360c",
+            "baae69",
+            "1b141f",
+            "a2fc0f",
+            "38fea3",
+            "f6e5e1",
+            "a2f397",
+            "39d0c5",
+            "08093e",
+            "a73d49",
+            "0d5ca8",
+            "cf8b3a",
+            "56e5ff",
+            "264b9b",
+            "7ee9b0",
+            "545732",
+            "c11d12",
+            "729c25",
+            "3c809f",
+            "625e57",
+            "1f64e2"
+          ]
+        },
+        "tcpSettings": {
+          "header": {
+            "type": "none"
+          }
+        }
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom",
+      "tag": "direct"
+    },
+    {
+      "protocol": "blackhole",
+      "tag": "api"
+    }
+  ],
+  "routing": {
+    "rules": [
+      {
+        "type": "field",
+        "inboundTag": [
+          "api"
+        ],
+        "outboundTag": "api"
+      }
+    ]
+  },
+  "policy": {
+    "levels": {
+      "0": {
+        "handshake": 4,
+        "connIdle": 300,
+        "uplinkOnly": 1,
+        "downlinkOnly": 1,
+        "bufferSize": 4,
+        "statsUserUplink": true,
+        "statsUserDownlink": true
+      },
+      "1": {
+        "handshake": 4,
+        "connIdle": 300,
+        "uplinkOnly": 1,
+        "downlinkOnly": 1,
+        "bufferSize": 4,
+        "statsUserUplink": true,
+        "statsUserDownlink": true,
+        "downlink": {
+          "speed": 65536,
+          "burst": 131072
+        },
+        "uplink": {
+          "speed": 65536,
+          "burst": 131072
+        }
+      },
+      "2": {
+        "handshake": 4,
+        "connIdle": 300,
+        "uplinkOnly": 1,
+        "downlinkOnly": 1,
+        "bufferSize": 4,
+        "statsUserUplink": true,
+        "statsUserDownlink": true,
+        "downlink": {
+          "speed": 1048576,
+          "burst": 2097152
+        },
+        "uplink": {
+          "speed": 1048576,
+          "burst": 2097152
+        }
+      },
+      "3": {
+        "handshake": 4,
+        "connIdle": 300,
+        "uplinkOnly": 1,
+        "downlinkOnly": 1,
+        "bufferSize": 4,
+        "statsUserUplink": true,
+        "statsUserDownlink": true,
+        "downlink": {
+          "speed": 10485760,
+          "burst": 20971520
+        },
+        "uplink": {
+          "speed": 10485760,
+          "burst": 20971520
+        }
+      },
+      "4": {
+        "handshake": 4,
+        "connIdle": 300,
+        "uplinkOnly": 1,
+        "downlinkOnly": 1,
+        "bufferSize": 4,
+        "statsUserUplink": true,
+        "statsUserDownlink": true,
+        "downlink": {
+          "speed": 20971520,
+          "burst": 41943040
+        },
+        "uplink": {
+          "speed": 20971520,
+          "burst": 41943040
+        }
+      }
+    },
+    "system": {
+      "statsInboundUplink": true,
+      "statsInboundDownlink": true,
+      "statsOutboundUplink": true,
+      "statsOutboundDownlink": true
+    }
+  }
+}

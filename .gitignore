@@ -1,0 +1,38 @@
+# Logs
+*.log
+logs/
+access.log
+stats.log
+traffic.log
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Sensitive data
+*.key
+*.pem
+*.crt
+.env
+secrets/
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+.temp/
+
+# Docker
+Dockerfile
+docker-compose.override.yml
+
+# System
+.DS_Store
+Thumbs.db
+
+# Backups
+*.bak
+*.backup
+*.tar
+*.gz
