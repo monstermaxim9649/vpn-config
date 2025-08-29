@@ -4,15 +4,25 @@
 
 ## Структура проекта
 ├── xray-reality/ # Xray сервер
+
 │ ├── config.json # Конфигурация Xray
+
 │ ├── docker-compose.yml # Docker Compose для Xray
+
 │ └── scripts/ # Скрипты управления
+
 ├── tg-bot/ # Telegram бот
+
 │ ├── xray_bot.py # Основной код бота
+
 │ ├── docker-compose.yml # Docker Compose для бота
+
 │ └── Dockerfile # Образ для бота
+
 └── scripts/ # Вспомогательные скрипты
+
 ├── deploy.sh # Скрипт развертывания
+
 └── install_dependencies.sh # Установка зависимостей
 
 Управление
