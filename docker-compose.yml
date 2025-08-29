@@ -2,15 +2,31 @@ version: '3.8'
 
 services:
   xray-reality:
-    image: teddysun/xray
+    image: teddysun/xray:latest
     container_name: xray-reality
     restart: unless-stopped
     ports:
       - "443:443"
     volumes:
-      - ./config.json:/etc/xray/config.json
-      - ./logs:/var/log/xray
-      - ./stats:/opt/xray/stats
+      - ./xray-reality/config.json:/etc/xray/config.json
+      - ./xray-reality/logs:/var/log/xray
+      - ./xray-reality/stats:/opt/xray/stats
+    networks:
+      - xray-network
+
+  xray-bot:
+    build: ./tg-bot
+    container_name: xray-telegram-bot
+    restart: unless-stopped
+    volumes:
+      - ./tg-bot/xray_bot.py:/app/xray_bot.py
+      - ./xray-reality/scripts:/app/scripts
+      - ./xray-reality/stats:/app/stats
+      - ./xray-reality/config.json:/app/config.json
+    depends_on:
+      - xray-reality
+    environment:
+      - TZ=Europe/Moscow
     networks:
       - xray-network
 
