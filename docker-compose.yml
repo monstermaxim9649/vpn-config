@@ -19,6 +19,7 @@ services:
     container_name: xray-telegram-bot
     restart: unless-stopped
     volumes:
+      - ./xray-reality/logs:/var/log/xray
       - ./tg-bot/xray_bot.py:/app/xray_bot.py
       - ./xray-reality/scripts:/app/scripts
       - ./xray-reality/stats:/app/stats

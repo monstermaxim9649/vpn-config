@@ -1,7 +1,7 @@
 #!/bin/bash
 # toggle_client.sh - включает/выключает клиента
 
-CONFIG="/opt/xray-reality/config.json"
+CONFIG="/app/config.json"
 CLIENT_EMAIL="$1"
 ACTION="$2"  # "block" или "unblock"
 
@@ -50,7 +50,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Применяем изменения
-mv "$TMP_FILE" "$CONFIG"
+cat "$TMP_FILE" >  "$CONFIG"
 
 # Проверяем валидность JSON
 if ! jq empty "$CONFIG" 2>/dev/null; then

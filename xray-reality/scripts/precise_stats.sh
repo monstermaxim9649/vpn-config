@@ -2,7 +2,7 @@
 
 CONTAINER="xray-reality"
 API_PORT=10085
-STATS_DIR="/opt/xray-reality/stats"
+STATS_DIR="/app/stats"
 STATS_DB="$STATS_DIR/stats.db"
 REPORT_FILE="$STATS_DIR/report.txt"
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 # speed_limit.sh - управление ограничением скорости
 
-CONFIG="/opt/xray-reality/config.json"
+CONFIG="/app/config.json"
 CLIENT_EMAIL="$1"
 ACTION="$2"
 

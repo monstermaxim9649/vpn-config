@@ -7,7 +7,7 @@ if [ -z "$1" ]; then
 fi
 
 NAME=$1
-CONFIG_FILE="/opt/xray-reality/config.json"
+CONFIG_FILE="/app/config.json"
 TEMP_FILE="/tmp/config.json.tmp"
 
 # Проверяем существование конфигурационного файла
@@ -24,22 +24,18 @@ SHORT_ID=$(openssl rand -hex 3)
 
 # Добавляем клиента во второй inbound (порт 443)
 jq --arg uuid "$UUID" --arg name "$NAME" --arg shortId "$SHORT_ID" \
-   '.inbounds[1].settings.clients += [{"id": $uuid, "flow": "xtls-rprx-vision", "email": $name}] | 
+   '.inbounds[1].settings.clients += [{"id": $uuid, "flow": "xtls-rprx-vision", "email": $name}] |
     .inbounds[1].streamSettings.realitySettings.shortIds += [$shortId]' \
-   "$CONFIG_FILE" > "$TEMP_FILE" && mv "$TEMP_FILE" "$CONFIG_FILE"
+   "$CONFIG_FILE" > "$TEMP_FILE" && cat "$TEMP_FILE" > "$CONFIG_FILE"
 
 if [ $? -ne 0 ]; then
     echo "Ошибка при обновлении конфигурации"
     exit 1
 fi
 
-# Перезапускаем контейнер Xray
-docker restart xray-reality
-
-if [ $? -ne 0 ]; then
-    echo "Ошибка при перезапуске контейнера"
-    exit 1
-fi
+# Перезагрузка Xray с помощью сигнала SIGHUP
+echo "Перезагрузка Xray для применения изменений..."
+pkill -SIGHUP xray 2>/dev/null || true
 
 # Получаем параметры сервера из конфига
 SERVER_NAME="mlaptev.ru"  # Ваш домен
