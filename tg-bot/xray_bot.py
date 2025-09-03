@@ -20,13 +20,13 @@ from telegram.ext import (
 # Конфигурация
 TELEGRAM_TOKEN = "7627035580:AAHYK4dlyX5eET0ilYmqSG2PVF59eWBnLUk"
 ALLOWED_USERS = [371478024]
-STATS_SCRIPT = "/opt/xray-reality/scripts/precise_stats.sh"
-CONFIG_FILE = "/opt/xray-reality/config.json"
-ACTIVE_CONN_SCRIPT = "/opt/xray-reality/scripts/get_active_connections.sh"
-ADD_USER_SCRIPT = "/opt/xray-reality/scripts/add_client.sh"
-DEL_USER_SCRIPT = "/opt/xray-reality/scripts/del_client.sh"
-TOGGLE_SCRIPT = "/opt/xray-reality/scripts/toggle_client.sh"
-SPEED_LIMIT_SCRIPT = "/opt/xray-reality/scripts/speed_limit.sh"
+STATS_SCRIPT = "/app/scripts/precise_stats.sh"
+CONFIG_FILE = "/app/config.json"
+ACTIVE_CONN_SCRIPT = "/app/scripts/get_active_connections.sh"
+ADD_USER_SCRIPT = "/app/scripts/add_client.sh"
+DEL_USER_SCRIPT = "/app/scripts/del_client.sh"
+TOGGLE_SCRIPT = "/app/scripts/toggle_client.sh"
+SPEED_LIMIT_SCRIPT = "/app/scripts/speed_limit.sh"
 
 # Состояния для ConversationHandler
 ENTER_USERNAME = 1
@@ -666,30 +666,48 @@ def process_speed_limit(update: Update, context: CallbackContext):
 # ==================== СИСТЕМНЫЕ ФУНКЦИИ ====================
 
 def restart_xray(update: Update, context: CallbackContext):
-    """Перезагружает Xray"""
+    """Перезагружает Xray с проверкой результата"""
     try:
         query = update.callback_query
         query.answer()
 
         query.edit_message_text("🔄 Перезагружаем Xray...")
 
-        result = subprocess.run(
-            ["docker", "restart", "xray-reality"],
-            capture_output=True,
-            text=True
-        )
+        # Способ 1: Через сигнал SIGHUP (предпочтительный)
+        try:
+            result = subprocess.run(
+                ["pkill", "-SIGHUP", "xray"],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            
+            # Проверяем статус Xray после перезагрузки
+            time.sleep(2)
+            status_check = subprocess.run(
+                ["pgrep", "-x", "xray"],
+                capture_output=True,
+                text=True
+            )
+            
+            if status_check.returncode == 0:
+                text = "✅ Xray успешно перезагружен\nНовая конфигурация активна"
+            else:
+                text = "⚠️ Xray не запущен после перезагрузки"
+                
+        except subprocess.TimeoutExpired:
+            text = "✅ Сигнал перезагрузки отправлен\nXray применяет конфигурацию"
 
-        if result.returncode == 0:
-            text = "✅ Xray успешно перезагружен"
-        else:
-            text = f"❌ Ошибка:\n{result.stderr}"
-
+        time.sleep(1)
+        query.edit_message_text(text)
         time.sleep(2)
         start(update, context)
+        
     except Exception as e:
         logger.error(f"Ошибка при перезагрузке Xray: {e}")
         query.edit_message_text(f"⚠️ Ошибка: {str(e)}")
-
+        time.sleep(2)
+        start(update, context)
 
 def button_handler(update: Update, context: CallbackContext):
     """Обработчик всех callback кнопок"""
