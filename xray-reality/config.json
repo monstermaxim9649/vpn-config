@@ -113,6 +113,18 @@
             "flow": "xtls-rprx-vision",
             "email": "LelyaNatasha",
             "level": 3
+          },
+          {
+            "id": "2cc5f805-3114-4037-aaa4-e87326ab4a02",
+            "flow": "xtls-rprx-vision",
+            "email": "venik",
+            "level": 4
+          },
+          {
+            "id": "aa448237-cccc-49a7-9efb-73afa2826d75",
+            "flow": "xtls-rprx-vision",
+            "email": "VenikMother",
+            "level": 2
           }
         ],
         "decryption": "none",
@@ -175,7 +187,14 @@
             "52fac3",
             "4db8fb",
             "fad5ae",
-            "7be5a0"
+            "7be5a0",
+            "a185d7",
+            "016b2f",
+            "515d4b",
+            "21adf0",
+            "232489",
+            "4cf2c0",
+            "db93d7"
           ]
         },
         "tcpSettings": {

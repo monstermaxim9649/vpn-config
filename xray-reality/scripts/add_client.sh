@@ -26,16 +26,25 @@ SHORT_ID=$(openssl rand -hex 3)
 jq --arg uuid "$UUID" --arg name "$NAME" --arg shortId "$SHORT_ID" \
    '.inbounds[1].settings.clients += [{"id": $uuid, "flow": "xtls-rprx-vision", "email": $name}] |
     .inbounds[1].streamSettings.realitySettings.shortIds += [$shortId]' \
-   "$CONFIG_FILE" > "$TEMP_FILE" && cat "$TEMP_FILE" > "$CONFIG_FILE"
+   "$CONFIG_FILE" > "$TEMP_FILE" && cp "$TEMP_FILE" "$CONFIG_FILE" && rm "$TEMP_FILE"
 
 if [ $? -ne 0 ]; then
     echo "Ошибка при обновлении конфигурации"
     exit 1
 fi
 
-# Перезагрузка Xray с помощью сигнала SIGHUP
-echo "Перезагрузка Xray для применения изменений..."
-pkill -SIGHUP xray 2>/dev/null || true
+#echo "✅ Пользователь $NAME добавлен в конфиг"
+
+# ПЕРЕЗАГРУЗКА XRAY - КРИТИЧЕСКИ ВАЖНО
+#echo "Перезагружаем Xray..."
+docker restart xray-reality
+
+#if [ $? -eq 0 ]; then
+#    echo "✅ Xray перезагружен успешно"
+#else
+#    echo "❌ Ошибка перезагрузки Xray"
+#    exit 1
+#fi
 
 # Получаем параметры сервера из конфига
 SERVER_NAME="mlaptev.ru"  # Ваш домен
