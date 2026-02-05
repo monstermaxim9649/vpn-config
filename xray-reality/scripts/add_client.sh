@@ -49,7 +49,7 @@ docker restart xray-reality
 # Получаем параметры сервера из конфига
 SERVER_NAME="mlaptev.ru"  # Ваш домен
 PUBLIC_KEY="rXDgSWxJnp3OKBeP0evsUEzf6dJcMoxgBFspIHwcGB0"  # Ваш публичный ключ
-SNI="www.vimeo.com"  # SNI для маскировки
+SNI="www.cloudflare.com"  # SNI для маскировки
 PORT=443
 
 # Формируем ссылку для подключения в точном формате

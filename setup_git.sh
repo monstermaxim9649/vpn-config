@@ -18,17 +18,12 @@ git config user.email "monstermaxim9649@gmail.com"
 # Создаем структуру директорий
 mkdir -p xray-reality/scripts
 mkdir -p xray-reality/stats
-mkdir -p tg-bot
 mkdir -p scripts
 
 # Копируем файлы Xray-reality
 echo "Копируем Xray-reality файлы..."
 cp /opt/xray-reality/config.json xray-reality/
 cp /opt/xray-reality/scripts/*.sh xray-reality/scripts/
-
-# Копируем Telegram bot файлы
-echo "Копируем Telegram bot файлы..."
-cp /opt/tg_bot/* tg-bot/
 
 # Создаем основные файлы конфигурации
 echo "Создаем Docker Compose и вспомогательные файлы..."
@@ -61,60 +56,6 @@ networks:
     driver: bridge
 EOF
 
-# Docker Compose для Telegram bot
-cat > tg-bot/docker-compose.yml << 'EOF'
-version: '3.8'
-
-services:
-  xray-bot:
-    build: .
-    container_name: xray-telegram-bot
-    restart: unless-stopped
-    volumes:
-      - ./xray_bot.py:/app/xray_bot.py
-      - ../xray-reality/scripts:/app/scripts
-      - ../xray-reality/stats:/app/stats
-      - ../xray-reality/config.json:/app/config.json
-    depends_on:
-      - xray-reality
-    environment:
-      - TZ=Europe/Moscow
-    networks:
-      - xray-network
-
-networks:
-  xray-network:
-    external: true
-    name: xray-reality_xray-network
-EOF
-
-# Dockerfile для бота
-cat > tg-bot/Dockerfile << 'EOF'
-FROM python:3.9-slim
-
-WORKDIR /app
-
-RUN apt-get update && apt-get install -y \
-    sqlite3 \
-    jq \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY . .
-
-CMD ["python", "xray_bot.py"]
-EOF
-
-# requirements.txt для бота
-cat > tg-bot/requirements.txt << 'EOF'
-python-telegram-bot==13.7
-requests==2.28.0
-pyyaml==6.0
-EOF
-
 # Скрипт установки зависимостей
 cat > scripts/install_dependencies.sh << 'EOF'
 #!/bin/bash
@@ -133,6 +74,7 @@ apt install -y \
     sqlite3 \
     jq \
     curl \
+    openssl \
     wget \
     git
 
@@ -186,29 +128,9 @@ else
     exit 1
 fi
 
-# Развертывание Telegram bot (если нужно)
-if [ -d "../tg-bot" ]; then
-    echo "Развертывание Telegram bot..."
-    cd ../tg-bot
-    
-    # Собираем и запускаем бота
-    docker-compose up -d --build
-    
-    echo "Ожидание запуска бота..."
-    sleep 3
-    
-    if docker ps | grep -q "xray-telegram-bot"; then
-        echo "✅ Telegram bot успешно запущен"
-    else
-        echo "⚠️  Возможна ошибка запуска бота"
-        docker logs xray-telegram-bot
-    fi
-fi
-
 echo "=== Развертывание завершено ==="
 echo "Проверьте логи:"
 echo "Xray: docker logs xray-reality"
-echo "Bot:  docker logs xray-telegram-bot"
 EOF
 
 # .gitignore
@@ -257,20 +179,17 @@ EOF
 cat > README.md << 'EOF'
 # Xray-Reality VPN Setup
 
-Полная система развертывания VPN сервера с Telegram ботом для управления.
+Полная система развертывания VPN сервера с локальными CLI-скриптами для управления.
 
 ## Структура проекта
 ├── xray-reality/ # Xray сервер
 │ ├── config.json # Конфигурация Xray
 │ ├── docker-compose.yml # Docker Compose для Xray
 │ └── scripts/ # Скрипты управления
-├── tg-bot/ # Telegram бот
-│ ├── xray_bot.py # Основной код бота
-│ ├── docker-compose.yml # Docker Compose для бота
-│ └── Dockerfile # Образ для бота
 └── scripts/ # Вспомогательные скрипты
 ├── deploy.sh # Скрипт развертывания
 └── install_dependencies.sh # Установка зависимостей
+├── manage_clients.sh # CLI для управления пользователями
 
 Управление
 
@@ -280,11 +199,21 @@ docker ps
 # Логи Xray
 docker logs xray-reality
 
-# Логи бота
-docker logs xray-telegram-bot
-
 # Перезапуск
 docker-compose -f xray-reality/docker-compose.yml restart
-docker-compose -f tg-bot/docker-compose.yml restart
+
+Управление пользователями (без Telegram)
+
+# Добавить пользователя и получить ссылку
+SERVER_NAME="your-domain.com" PUBLIC_KEY="your-public-key" ./scripts/manage_clients.sh add <имя>
+
+# Удалить пользователя
+./scripts/manage_clients.sh remove <имя>
+
+# Отключить пользователя
+./scripts/manage_clients.sh disable <имя>
+
+# Включить пользователя
+./scripts/manage_clients.sh enable <имя>
 
 EOF

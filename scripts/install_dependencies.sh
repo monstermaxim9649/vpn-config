@@ -14,6 +14,7 @@ apt install -y \
     sqlite3 \
     jq \
     curl \
+    openssl \
     wget \
     git
 

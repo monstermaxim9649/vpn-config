@@ -14,21 +14,27 @@ services:
     networks:
       - xray-network
 
-  xray-bot:
-    build: ./tg-bot
-    container_name: xray-telegram-bot
+  xray-web-ui:
+    build: ./web-ui
+    container_name: xray-web-ui
     restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - CONFIG_FILE=/app/config.json
+      - XRAY_CONTAINER_NAME=xray-reality
+      - SERVER_NAME=your-domain.com
+      - PUBLIC_KEY=your-public-key
+      - SNI=www.cloudflare.com
+      - PORT=443
+      - UI_USERNAME=admin
+      - UI_PASSWORD=change-me
+      - SECRET_KEY=change-me
     volumes:
-      - ./xray-reality/logs:/var/log/xray
-      - ./tg-bot/xray_bot.py:/app/xray_bot.py
-      - ./xray-reality/scripts:/app/scripts
-      - ./xray-reality/stats:/app/stats
       - ./xray-reality/config.json:/app/config.json
-      - /var/run/docker.sock:/var/run/docker.sock  # ⭐ ДОБАВЬТЕ ЭТУ СТРОКУ
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - xray-reality
-    environment:
-      - TZ=Europe/Moscow
     networks:
       - xray-network
 
