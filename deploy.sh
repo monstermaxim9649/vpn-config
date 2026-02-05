@@ -1,4 +1,4 @@
-k#!/bin/bash
+#!/bin/bash
 # deploy.sh - Полное развертывание системы
 
 set -e
@@ -8,11 +8,6 @@ echo "=== Полное развертывание Xray-Reality системы ==
 # Проверяем необходимые файлы
 if [ ! -f "xray-reality/config.json" ]; then
     echo "❌ Ошибка: config.json не найден в xray-reality/"
-    exit 1
-fi
-
-if [ ! -f "tg-bot/Dockerfile" ]; then
-    echo "❌ Ошибка: Dockerfile не найден в tg-bot/"
     exit 1
 fi
 
@@ -26,11 +21,11 @@ echo "Останавливаем старые контейнеры..."
 docker-compose down 2>/dev/null || true
 
 # Удаляем старые контейнеры с такими же именами
-docker rm -f xray-reality xray-telegram-bot 2>/dev/null || true
+docker rm -f xray-reality 2>/dev/null || true
 
-# Запускаем всю систему
-echo "Запуск Xray-Reality и Telegram bot..."
-docker-compose up -d --build
+# Запускаем Xray
+echo "Запуск Xray-Reality..."
+docker-compose up -d
 
 echo "Ожидание запуска сервисов..."
 sleep 10
@@ -45,12 +40,11 @@ else
     exit 1
 fi
 
-if docker ps | grep -q "xray-telegram-bot"; then
-    echo "✅ Telegram bot успешно запущен"
+if docker ps | grep -q "xray-web-ui"; then
+    echo "✅ Веб-интерфейс управления запущен"
 else
-    echo "❌ Ошибка запуска Telegram bot"
-    docker logs xray-telegram-bot 2>/dev/null || true
-    exit 1
+    echo "⚠️  Веб-интерфейс управления не запущен"
+    docker logs xray-web-ui 2>/dev/null || true
 fi
 
 echo "=== Развертывание завершено ==="
