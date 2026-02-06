@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Xray Reality Manager</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Xray Reality Manager</h1>
+      <p>Управление пользователями для {{ server_name }}</p>
+    </header>
+
+    <section class="panel">
+      <h2>Добавить пользователя</h2>
+      <form method="post" action="/add">
+        <label for="name">Имя (email)</label>
+        <input id="name" name="name" placeholder="username" required />
+        <button type="submit">Добавить</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Список пользователей</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Имя</th>
+            <th>ID</th>
+            <th>Flow</th>
+            <th>Level</th>
+            <th>Статус</th>
+            <th>Действия</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for client in clients %}
+          <tr>
+            <td>{{ client.name }}</td>
+            <td class="mono">{{ client.id }}</td>
+            <td>{{ client.flow }}</td>
+            <td>{{ client.level if client.level is not none else "—" }}</td>
+            <td>
+              {% if client.disabled %}
+                <span class="badge badge-disabled">Отключен</span>
+              {% else %}
+                <span class="badge badge-enabled">Активен</span>
+              {% endif %}
+            </td>
+            <td>
+              <form method="post" action="/disable" class="inline">
+                <input type="hidden" name="name" value="{{ client.name }}" />
+                <button type="submit" {% if client.disabled %}disabled{% endif %}>Отключить</button>
+              </form>
+              <form method="post" action="/enable" class="inline">
+                <input type="hidden" name="name" value="{{ client.name }}" />
+                <button type="submit" {% if not client.disabled %}disabled{% endif %}>Включить</button>
+              </form>
+              <form method="post" action="/remove" class="inline">
+                <input type="hidden" name="name" value="{{ client.name }}" />
+                <button type="submit" class="danger">Удалить</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>Отключенные пользователи</h2>
+      {% if disabled %}
+        <ul>
+          {% for name in disabled %}
+            <li>{{ name }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>Нет отключенных пользователей.</p>
+      {% endif %}
+    </section>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <section class="panel">
+          <h2>Сообщения</h2>
+          <ul class="messages">
+            {% for category, message in messages %}
+              <li class="message {{ category }}">{{ message }}</li>
+            {% endfor %}
+          </ul>
+        </section>
+      {% endif %}
+    {% endwith %}
+  </body>
+</html>
