@@ -25,7 +25,7 @@ services:
       - XRAY_CONTAINER_NAME=xray-reality
       - SERVER_NAME=your-domain.com
       - PUBLIC_KEY=your-public-key
-      - SNI=www.cloudflare.com
+      - SNI=www.microsoft.com
       - FP=chrome
       - PORT=443
       - UI_USERNAME=admin

@@ -16,7 +16,9 @@ apt install -y \
     curl \
     openssl \
     wget \
-    git
+    git \
+    ipset \
+    iptables
 
 # Добавление пользователя в группу docker
 usermod -aG docker $USER

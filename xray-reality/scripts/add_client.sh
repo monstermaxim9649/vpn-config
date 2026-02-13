@@ -49,7 +49,7 @@ docker restart xray-reality
 # Получаем параметры сервера из конфига
 SERVER_NAME="mlaptev.ru"  # Ваш домен
 PUBLIC_KEY="rXDgSWxJnp3OKBeP0evsUEzf6dJcMoxgBFspIHwcGB0"  # Ваш публичный ключ
-SNI="www.apple.com"  # SNI для маскировки
+SNI="www.microsoft.com"  # SNI для маскировки
 FP="${FP:-chrome}"
 PORT=443
 

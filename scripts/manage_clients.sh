@@ -4,9 +4,8 @@ set -euo pipefail
 CONFIG_FILE="${CONFIG_FILE:-./xray-reality/config.json}"
 SERVER_NAME="${SERVER_NAME:-mlaptev.ru}"
 PUBLIC_KEY="${PUBLIC_KEY:-rXDgSWxJnp3OKBeP0evsUEzf6dJcMoxgBFspIHwcGB0}"
-SNI="${SNI:-www.apple.com}"
+SNI="${SNI:-www.microsoft.com}"
 FP="${FP:-chrome}"
-
 PORT="${PORT:-443}"
 
 require_cmd() {
@@ -36,9 +35,8 @@ usage() {
   CONFIG_FILE  путь до config.json (по умолчанию ./xray-reality/config.json)
   SERVER_NAME  домен сервера для ссылки
   PUBLIC_KEY   публичный ключ Reality
-  SNI          SNI для маскировки (по умолчанию www.apple.com)
+  SNI          SNI для маскировки (по умолчанию www.microsoft.com)
   FP           fingerprint (по умолчанию chrome)
-
   PORT         порт подключения (по умолчанию 443)
 EOF
 }
@@ -70,9 +68,7 @@ case "$ACTION" in
 
     docker restart xray-reality >/dev/null
 
-
     CONFIG_LINK="vless://$UUID@$SERVER_NAME:$PORT?type=tcp&security=reality&pbk=$PUBLIC_KEY&fp=$FP&sni=$SNI&sid=$SHORT_ID&spx=%2F&flow=xtls-rprx-vision#$NAME"
-
     echo "$CONFIG_LINK"
     ;;
   remove)

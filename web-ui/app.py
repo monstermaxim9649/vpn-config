@@ -15,7 +15,7 @@ CONFIG_FILE = os.environ.get("CONFIG_FILE", "/app/config.json")
 XRAY_CONTAINER_NAME = os.environ.get("XRAY_CONTAINER_NAME", "xray-reality")
 SERVER_NAME = os.environ.get("SERVER_NAME", "your-domain.com")
 PUBLIC_KEY = os.environ.get("PUBLIC_KEY", "your-public-key")
-SNI = os.environ.get("SNI", "www.cloudflare.com")
+SNI = os.environ.get("SNI", "www.microsoft.com")
 PORT = os.environ.get("PORT", "443")
 FP = os.environ.get("FP", "chrome")
 UI_USERNAME = os.environ.get("UI_USERNAME", "admin")
@@ -83,10 +83,9 @@ def restart_xray():
     container.restart()
 
 
-
 def resolve_link_settings(config, inbound):
     resolved_sni = SNI
-    if not resolved_sni or resolved_sni == "www.cloudflare.com":
+    if not resolved_sni or resolved_sni == "www.microsoft.com":
         reality = inbound.get("streamSettings", {}).get("realitySettings", {})
         server_names = reality.get("serverNames") or []
         if server_names:
