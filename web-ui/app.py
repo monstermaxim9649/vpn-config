@@ -83,6 +83,7 @@ def restart_xray():
     container.restart()
 
 
+
 def resolve_link_settings(config, inbound):
     resolved_sni = SNI
     if not resolved_sni or resolved_sni == "www.cloudflare.com":

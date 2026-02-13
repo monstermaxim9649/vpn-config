@@ -40,6 +40,7 @@ docker-compose restart
 ## Веб-интерфейс управления
 
 1. Заполните переменные окружения для сервиса `xray-web-ui` в `docker-compose.yml`:
+
    - `SERVER_NAME`, `PUBLIC_KEY` (для генерации ссылок)
    - `SNI`, `PORT` можно не задавать: по умолчанию используются значения из `xray-reality/config.json`
    - `FP` (fingerprint, по умолчанию `chrome`)
