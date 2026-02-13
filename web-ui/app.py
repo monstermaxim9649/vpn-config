@@ -17,6 +17,7 @@ SERVER_NAME = os.environ.get("SERVER_NAME", "your-domain.com")
 PUBLIC_KEY = os.environ.get("PUBLIC_KEY", "your-public-key")
 SNI = os.environ.get("SNI", "www.cloudflare.com")
 PORT = os.environ.get("PORT", "443")
+FP = os.environ.get("FP", "chrome")
 UI_USERNAME = os.environ.get("UI_USERNAME", "admin")
 UI_PASSWORD = os.environ.get("UI_PASSWORD", "change-me")
 
@@ -82,10 +83,28 @@ def restart_xray():
     container.restart()
 
 
-def build_link(client_id, short_id, name):
+
+def resolve_link_settings(config, inbound):
+    resolved_sni = SNI
+    if not resolved_sni or resolved_sni == "www.cloudflare.com":
+        reality = inbound.get("streamSettings", {}).get("realitySettings", {})
+        server_names = reality.get("serverNames") or []
+        if server_names:
+            resolved_sni = server_names[0]
+
+    resolved_port = PORT
+    if not resolved_port or resolved_port == "443":
+        inbound_port = inbound.get("port")
+        if inbound_port:
+            resolved_port = str(inbound_port)
+
+    return resolved_sni, resolved_port
+
+
+def build_link(client_id, short_id, name, sni, port, fingerprint):
     return (
-        f"vless://{client_id}@{SERVER_NAME}:{PORT}?type=tcp&security=reality"
-        f"&pbk={PUBLIC_KEY}&fp=chrome&sni={SNI}&sid={short_id}&spx=%2F"
+        f"vless://{client_id}@{SERVER_NAME}:{port}?type=tcp&security=reality"
+        f"&pbk={PUBLIC_KEY}&fp={fingerprint}&sni={sni}&sid={short_id}&spx=%2F"
         f"&flow=xtls-rprx-vision#{name}"
     )
 
@@ -142,13 +161,14 @@ def add_client():
         return redirect(url_for("index"))
 
     client_id = str(uuid.uuid4())
-    short_id = secrets.token_hex(3)
-    clients.append({"id": client_id, "flow": "xtls-rprx-vision", "email": name})
-
-    stream = inbound.setdefault("streamSettings", {})
-    reality = stream.setdefault("realitySettings", {})
+    reality = inbound.setdefault("streamSettings", {}).setdefault("realitySettings", {})
     short_ids = reality.setdefault("shortIds", [])
-    short_ids.append(short_id)
+    if short_ids:
+        short_id = secrets.choice(short_ids)
+    else:
+        short_id = secrets.token_hex(3)
+        short_ids.append(short_id)
+    clients.append({"id": client_id, "flow": "xtls-rprx-vision", "email": name})
 
     save_config(config)
     try:
@@ -157,7 +177,11 @@ def add_client():
     except docker.errors.DockerException as exc:
         flash(f"Пользователь добавлен, но перезапуск Xray не удался: {exc}", "error")
 
-    link = build_link(client_id, short_id, name)
+    resolved_sni, resolved_port = resolve_link_settings(config, inbound)
+    if PUBLIC_KEY == "your-public-key":
+        flash("Задайте PUBLIC_KEY для генерации ссылки.", "error")
+        return redirect(url_for("index"))
+    link = build_link(client_id, short_id, name, resolved_sni, resolved_port, FP)
     flash(f"Ссылка клиента: {link}", "info")
     return redirect(url_for("index"))
 

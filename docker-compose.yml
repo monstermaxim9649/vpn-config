@@ -26,6 +26,7 @@ services:
       - SERVER_NAME=your-domain.com
       - PUBLIC_KEY=your-public-key
       - SNI=www.cloudflare.com
+      - FP=chrome
       - PORT=443
       - UI_USERNAME=admin
       - UI_PASSWORD=change-me

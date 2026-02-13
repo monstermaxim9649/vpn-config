@@ -49,10 +49,11 @@ docker restart xray-reality
 # Получаем параметры сервера из конфига
 SERVER_NAME="mlaptev.ru"  # Ваш домен
 PUBLIC_KEY="rXDgSWxJnp3OKBeP0evsUEzf6dJcMoxgBFspIHwcGB0"  # Ваш публичный ключ
-SNI="www.cloudflare.com"  # SNI для маскировки
+SNI="www.apple.com"  # SNI для маскировки
+FP="${FP:-chrome}"
 PORT=443
 
 # Формируем ссылку для подключения в точном формате
-CONFIG_LINK="vless://$UUID@$SERVER_NAME:$PORT?type=tcp&security=reality&pbk=$PUBLIC_KEY&fp=chrome&sni=$SNI&sid=$SHORT_ID&spx=%2F&flow=xtls-rprx-vision#$NAME"
+CONFIG_LINK="vless://$UUID@$SERVER_NAME:$PORT?type=tcp&security=reality&pbk=$PUBLIC_KEY&fp=$FP&sni=$SNI&sid=$SHORT_ID&spx=%2F&flow=xtls-rprx-vision#$NAME"
 
 echo "$CONFIG_LINK"

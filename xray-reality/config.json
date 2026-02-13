@@ -138,12 +138,14 @@
         "security": "reality",
         "realitySettings": {
           "show": false,
-          "dest": "www.cloudflare.com:443",
+          "dest": "www.apple.com:443",
           "xver": 0,
           "serverNames": [
+            "www.apple.com",
             "www.cloudflare.com",
-            "www.vimeo.com",
-            "www.microsoft.com"
+            "www.google.com",
+            "www.microsoft.com",
+            "www.vimeo.com"
           ],
           "privateKey": "oAMt6sI9LNcBDzzylDYDONePBDuwk-nERh-RsKdrAEQ",
           "shortIds": [
