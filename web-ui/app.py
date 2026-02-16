@@ -13,13 +13,13 @@ app.secret_key = os.environ.get("SECRET_KEY", secrets.token_hex(16))
 
 CONFIG_FILE = os.environ.get("CONFIG_FILE", "/app/config.json")
 XRAY_CONTAINER_NAME = os.environ.get("XRAY_CONTAINER_NAME", "xray-reality")
-SERVER_NAME = os.environ.get("SERVER_NAME", "your-domain.com")
-PUBLIC_KEY = os.environ.get("PUBLIC_KEY", "your-public-key")
+SERVER_NAME = os.environ.get("SERVER_NAME", "mlaptev.ru")
+PUBLIC_KEY = os.environ.get("PUBLIC_KEY", "rXDgSWxJnp3OKBeP0evsUEzf6dJcMoxgBFspIHwcGB0")
 SNI = os.environ.get("SNI", "www.microsoft.com")
 PORT = os.environ.get("PORT", "443")
 FP = os.environ.get("FP", "chrome")
-UI_USERNAME = os.environ.get("UI_USERNAME", "admin")
-UI_PASSWORD = os.environ.get("UI_PASSWORD", "change-me")
+UI_USERNAME = os.environ.get("UI_USERNAME", "mlaptev")
+UI_PASSWORD = os.environ.get("UI_PASSWORD", "maximlaptev")
 
 
 def require_basic_auth():

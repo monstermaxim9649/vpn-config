@@ -23,14 +23,14 @@ services:
     environment:
       - CONFIG_FILE=/app/config.json
       - XRAY_CONTAINER_NAME=xray-reality
-      - SERVER_NAME=your-domain.com
-      - PUBLIC_KEY=your-public-key
+      - SERVER_NAME=mlaptev.ru
+      - PUBLIC_KEY=rXDgSWxJnp3OKBeP0evsUEzf6dJcMoxgBFspIHwcGB0
       - SNI=www.microsoft.com
       - FP=chrome
       - PORT=443
-      - UI_USERNAME=admin
-      - UI_PASSWORD=change-me
-      - SECRET_KEY=change-me
+      - UI_USERNAME=mlaptev
+      - UI_PASSWORD=maximlaptev
+      - SECRET_KEY=oAMt6sI9LNcBDzzylDYDONePBDuwk-nERh-RsKdrAEQ
     volumes:
       - ./xray-reality/config.json:/app/config.json
       - /var/run/docker.sock:/var/run/docker.sock
