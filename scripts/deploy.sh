@@ -36,26 +36,11 @@ else
     exit 1
 fi
 
-# Развертывание Telegram bot (если нужно)
-if [ -d "../tg-bot" ]; then
-    echo "Развертывание Telegram bot..."
-    cd ../tg-bot
-    
-    # Собираем и запускаем бота
-    docker-compose up -d --build
-    
-    echo "Ожидание запуска бота..."
-    sleep 3
-    
-    if docker ps | grep -q "xray-telegram-bot"; then
-        echo "✅ Telegram bot успешно запущен"
-    else
-        echo "⚠️  Возможна ошибка запуска бота"
-        docker logs xray-telegram-bot
-    fi
-fi
-
 echo "=== Развертывание завершено ==="
 echo "Проверьте логи:"
 echo "Xray: docker logs xray-reality"
-echo "Bot:  docker logs xray-telegram-bot"
+if docker ps | grep -q "xray-web-ui"; then
+    echo "Web UI: docker logs xray-web-ui"
+else
+    echo "Web UI: контейнер не запущен"
+fi

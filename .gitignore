@@ -26,6 +26,7 @@ secrets/
 # Docker
 Dockerfile
 docker-compose.override.yml
+!web-ui/Dockerfile
 
 # System
 .DS_Store

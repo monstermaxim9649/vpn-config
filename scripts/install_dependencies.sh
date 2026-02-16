@@ -14,8 +14,11 @@ apt install -y \
     sqlite3 \
     jq \
     curl \
+    openssl \
     wget \
-    git
+    git \
+    ipset \
+    iptables
 
 # Добавление пользователя в группу docker
 usermod -aG docker $USER
