@@ -75,6 +75,28 @@ def get_vless_inbound(config):
     return None
 
 
+def ensure_list(settings, key):
+    value = settings.get(key)
+    if not isinstance(value, list):
+        value = []
+        settings[key] = value
+    return value
+
+
+def get_clients(settings):
+    return ensure_list(settings, "clients")
+
+
+def get_disabled_clients(settings):
+    return ensure_list(settings, "disabledClients")
+
+
+def route_error_redirect(message):
+    app.logger.exception(message)
+    flash(f"{message} Проверьте доступ к config.json и docker.sock.", "error")
+    return redirect(url_for("index"))
+
+
 def restart_xray():
     if os.environ.get("XRAY_RESTART", "true").lower() in {"false", "0", "no"}:
         return
@@ -115,149 +137,165 @@ def health():
 
 @app.route("/")
 def index():
-    config = load_config()
-    inbound = get_vless_inbound(config)
-    if not inbound:
-        return "VLESS inbound not found", 500
-    settings = inbound.get("settings", {})
-    clients = settings.get("clients", [])
-    disabled = set(settings.get("disabledClients", []) or [])
-    clients_view = []
-    for client in clients:
-        name = client.get("email", "")
-        clients_view.append(
-            {
-                "id": client.get("id"),
-                "name": name,
-                "flow": client.get("flow"),
-                "level": client.get("level"),
-                "disabled": name in disabled,
-            }
+    try:
+        config = load_config()
+        inbound = get_vless_inbound(config)
+        if not inbound:
+            flash("VLESS inbound не найден в config.json.", "error")
+            return render_template("index.html", clients=[], disabled=[], server_name=SERVER_NAME)
+        settings = inbound.setdefault("settings", {})
+        clients = get_clients(settings)
+        disabled = set(get_disabled_clients(settings))
+        clients_view = []
+        for client in clients:
+            name = client.get("email", "")
+            clients_view.append(
+                {
+                    "id": client.get("id"),
+                    "name": name,
+                    "flow": client.get("flow"),
+                    "level": client.get("level"),
+                    "disabled": name in disabled,
+                }
+            )
+        return render_template(
+            "index.html",
+            clients=clients_view,
+            disabled=sorted(disabled),
+            server_name=SERVER_NAME,
         )
-    return render_template(
-        "index.html",
-        clients=clients_view,
-        disabled=sorted(disabled),
-        server_name=SERVER_NAME,
-    )
+    except Exception:
+        return route_error_redirect("Ошибка чтения конфигурации.")
 
 
 @app.route("/add", methods=["POST"])
 def add_client():
-    name = request.form.get("name", "").strip()
-    if not name:
-        flash("Укажите имя пользователя.", "error")
-        return redirect(url_for("index"))
-    config = load_config()
-    inbound = get_vless_inbound(config)
-    if not inbound:
-        flash("VLESS inbound не найден.", "error")
-        return redirect(url_for("index"))
-    settings = inbound.setdefault("settings", {})
-    clients = settings.setdefault("clients", [])
-    if any(client.get("email") == name for client in clients):
-        flash("Пользователь с таким именем уже существует.", "error")
-        return redirect(url_for("index"))
-
-    client_id = str(uuid.uuid4())
-    reality = inbound.setdefault("streamSettings", {}).setdefault("realitySettings", {})
-    short_ids = reality.setdefault("shortIds", [])
-    if short_ids:
-        short_id = secrets.choice(short_ids)
-    else:
-        short_id = secrets.token_hex(3)
-        short_ids.append(short_id)
-    clients.append({"id": client_id, "flow": "xtls-rprx-vision", "email": name})
-
-    save_config(config)
     try:
-        restart_xray()
-        flash("Пользователь добавлен и Xray перезапущен.", "success")
-    except docker.errors.DockerException as exc:
-        flash(f"Пользователь добавлен, но перезапуск Xray не удался: {exc}", "error")
+        name = request.form.get("name", "").strip()
+        if not name:
+            flash("Укажите имя пользователя.", "error")
+            return redirect(url_for("index"))
+        config = load_config()
+        inbound = get_vless_inbound(config)
+        if not inbound:
+            flash("VLESS inbound не найден.", "error")
+            return redirect(url_for("index"))
+        settings = inbound.setdefault("settings", {})
+        clients = get_clients(settings)
+        if any(client.get("email") == name for client in clients):
+            flash("Пользователь с таким именем уже существует.", "error")
+            return redirect(url_for("index"))
 
-    resolved_sni, resolved_port = resolve_link_settings(config, inbound)
-    if PUBLIC_KEY == "your-public-key":
-        flash("Задайте PUBLIC_KEY для генерации ссылки.", "error")
+        client_id = str(uuid.uuid4())
+        reality = inbound.setdefault("streamSettings", {}).setdefault("realitySettings", {})
+        short_ids = ensure_list(reality, "shortIds")
+        if short_ids:
+            short_id = secrets.choice(short_ids)
+        else:
+            short_id = secrets.token_hex(3)
+            short_ids.append(short_id)
+        clients.append({"id": client_id, "flow": "xtls-rprx-vision", "email": name})
+
+        save_config(config)
+        try:
+            restart_xray()
+            flash("Пользователь добавлен и Xray перезапущен.", "success")
+        except docker.errors.DockerException as exc:
+            flash(f"Пользователь добавлен, но перезапуск Xray не удался: {exc}", "error")
+
+        resolved_sni, resolved_port = resolve_link_settings(config, inbound)
+        if PUBLIC_KEY == "your-public-key":
+            flash("Задайте PUBLIC_KEY для генерации ссылки.", "error")
+            return redirect(url_for("index"))
+        link = build_link(client_id, short_id, name, resolved_sni, resolved_port, FP)
+        flash(f"Ссылка клиента: {link}", "info")
         return redirect(url_for("index"))
-    link = build_link(client_id, short_id, name, resolved_sni, resolved_port, FP)
-    flash(f"Ссылка клиента: {link}", "info")
-    return redirect(url_for("index"))
+    except Exception:
+        return route_error_redirect("Ошибка добавления пользователя.")
 
 
 @app.route("/remove", methods=["POST"])
 def remove_client():
-    name = request.form.get("name", "").strip()
-    if not name:
-        flash("Укажите имя пользователя для удаления.", "error")
-        return redirect(url_for("index"))
-    config = load_config()
-    inbound = get_vless_inbound(config)
-    if not inbound:
-        flash("VLESS inbound не найден.", "error")
-        return redirect(url_for("index"))
-    settings = inbound.setdefault("settings", {})
-    clients = settings.setdefault("clients", [])
-    original_count = len(clients)
-    clients[:] = [client for client in clients if client.get("email") != name]
-    if len(clients) == original_count:
-        flash("Пользователь не найден.", "error")
-        return redirect(url_for("index"))
-
-    save_config(config)
     try:
-        restart_xray()
-        flash("Пользователь удален, Xray перезапущен.", "success")
-    except docker.errors.DockerException as exc:
-        flash(f"Пользователь удален, но перезапуск Xray не удался: {exc}", "error")
-    return redirect(url_for("index"))
+        name = request.form.get("name", "").strip()
+        if not name:
+            flash("Укажите имя пользователя для удаления.", "error")
+            return redirect(url_for("index"))
+        config = load_config()
+        inbound = get_vless_inbound(config)
+        if not inbound:
+            flash("VLESS inbound не найден.", "error")
+            return redirect(url_for("index"))
+        settings = inbound.setdefault("settings", {})
+        clients = get_clients(settings)
+        original_count = len(clients)
+        clients[:] = [client for client in clients if client.get("email") != name]
+        if len(clients) == original_count:
+            flash("Пользователь не найден.", "error")
+            return redirect(url_for("index"))
+
+        save_config(config)
+        try:
+            restart_xray()
+            flash("Пользователь удален, Xray перезапущен.", "success")
+        except docker.errors.DockerException as exc:
+            flash(f"Пользователь удален, но перезапуск Xray не удался: {exc}", "error")
+        return redirect(url_for("index"))
+    except Exception:
+        return route_error_redirect("Ошибка удаления пользователя.")
 
 
 @app.route("/disable", methods=["POST"])
 def disable_client():
-    name = request.form.get("name", "").strip()
-    if not name:
-        flash("Укажите имя пользователя для отключения.", "error")
-        return redirect(url_for("index"))
-    config = load_config()
-    inbound = get_vless_inbound(config)
-    if not inbound:
-        flash("VLESS inbound не найден.", "error")
-        return redirect(url_for("index"))
-    settings = inbound.setdefault("settings", {})
-    disabled = settings.setdefault("disabledClients", [])
-    if name not in disabled:
-        disabled.append(name)
-    save_config(config)
     try:
-        restart_xray()
-        flash("Пользователь отключен, Xray перезапущен.", "success")
-    except docker.errors.DockerException as exc:
-        flash(f"Пользователь отключен, но перезапуск Xray не удался: {exc}", "error")
-    return redirect(url_for("index"))
+        name = request.form.get("name", "").strip()
+        if not name:
+            flash("Укажите имя пользователя для отключения.", "error")
+            return redirect(url_for("index"))
+        config = load_config()
+        inbound = get_vless_inbound(config)
+        if not inbound:
+            flash("VLESS inbound не найден.", "error")
+            return redirect(url_for("index"))
+        settings = inbound.setdefault("settings", {})
+        disabled = get_disabled_clients(settings)
+        if name not in disabled:
+            disabled.append(name)
+        save_config(config)
+        try:
+            restart_xray()
+            flash("Пользователь отключен, Xray перезапущен.", "success")
+        except docker.errors.DockerException as exc:
+            flash(f"Пользователь отключен, но перезапуск Xray не удался: {exc}", "error")
+        return redirect(url_for("index"))
+    except Exception:
+        return route_error_redirect("Ошибка отключения пользователя.")
 
 
 @app.route("/enable", methods=["POST"])
 def enable_client():
-    name = request.form.get("name", "").strip()
-    if not name:
-        flash("Укажите имя пользователя для включения.", "error")
-        return redirect(url_for("index"))
-    config = load_config()
-    inbound = get_vless_inbound(config)
-    if not inbound:
-        flash("VLESS inbound не найден.", "error")
-        return redirect(url_for("index"))
-    settings = inbound.setdefault("settings", {})
-    disabled = settings.setdefault("disabledClients", [])
-    settings["disabledClients"] = [entry for entry in disabled if entry != name]
-    save_config(config)
     try:
-        restart_xray()
-        flash("Пользователь включен, Xray перезапущен.", "success")
-    except docker.errors.DockerException as exc:
-        flash(f"Пользователь включен, но перезапуск Xray не удался: {exc}", "error")
-    return redirect(url_for("index"))
+        name = request.form.get("name", "").strip()
+        if not name:
+            flash("Укажите имя пользователя для включения.", "error")
+            return redirect(url_for("index"))
+        config = load_config()
+        inbound = get_vless_inbound(config)
+        if not inbound:
+            flash("VLESS inbound не найден.", "error")
+            return redirect(url_for("index"))
+        settings = inbound.setdefault("settings", {})
+        disabled = get_disabled_clients(settings)
+        settings["disabledClients"] = [entry for entry in disabled if entry != name]
+        save_config(config)
+        try:
+            restart_xray()
+            flash("Пользователь включен, Xray перезапущен.", "success")
+        except docker.errors.DockerException as exc:
+            flash(f"Пользователь включен, но перезапуск Xray не удался: {exc}", "error")
+        return redirect(url_for("index"))
+    except Exception:
+        return route_error_redirect("Ошибка включения пользователя.")
 
 
 if __name__ == "__main__":
