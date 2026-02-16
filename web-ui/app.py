@@ -58,12 +58,11 @@ def load_config():
 
 
 def save_config(config):
-    directory = os.path.dirname(CONFIG_FILE) or "."
-    with tempfile.NamedTemporaryFile("w", delete=False, dir=directory, encoding="utf-8") as tmp:
-        json.dump(config, tmp, ensure_ascii=False, indent=2)
-        tmp.write("\n")
-    os.replace(tmp.name, CONFIG_FILE)
-
+    data = json.dumps(config, ensure_ascii=False, indent=2) + "\n"
+    with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+        f.write(data)
+        f.flush()
+        os.fsync(f.fileno())
 
 def get_vless_inbound(config):
     for inbound in config.get("inbounds", []):

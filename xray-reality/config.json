@@ -125,6 +125,11 @@
             "flow": "xtls-rprx-vision",
             "email": "VenikMother",
             "level": 2
+          },
+          {
+            "id": "cbaea74c-dbad-45ab-9114-37773ba679ea",
+            "flow": "xtls-rprx-vision",
+            "email": "maxim"
           }
         ],
         "decryption": "none",
